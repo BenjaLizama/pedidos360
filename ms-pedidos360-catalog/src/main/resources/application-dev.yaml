@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: catalog-service
+  mongodb:
+    uri: mongodb://admin:secret@localhost:27017/catalog_db?authSource=admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
