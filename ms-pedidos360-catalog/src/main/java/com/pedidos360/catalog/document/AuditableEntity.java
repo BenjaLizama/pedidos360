@@ -20,7 +20,7 @@ public abstract class AuditableEntity {
     private Long version;
 
     @CreatedDate
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @CreatedBy
     private String createdBy;
