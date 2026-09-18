@@ -1,6 +1,7 @@
 package com.pedidos360.catalog.controller;
 
 import com.pedidos360.catalog.dto.request.ProductRequest;
+import com.pedidos360.catalog.dto.request.ProductUpdateRequest;
 import com.pedidos360.catalog.dto.response.ProductResponse;
 import com.pedidos360.catalog.dto.response.StandardResponse;
 import com.pedidos360.catalog.service.ProductService;
@@ -43,5 +44,21 @@ public class ProductController {
         ProductResponse product = productService.getProductById(id);
 
         return ResponseEntity.ok(StandardResponse.ok("Producto encontrado", product));
+    }
+
+    /**
+     * Actualiza la información de un producto existente.
+     *
+     * @param id Identificador del producto a actualizar.
+     * @param request Nuevos datos del producto validados por Spring.
+     * @return ResponseEntity con StandardResponse y código HTTP 200 (OK).
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<StandardResponse<ProductResponse>> updateProduct(
+            @PathVariable String id,
+            @Valid @RequestBody ProductUpdateRequest request) { // <-- Cambiamos el DTO aquí
+
+        ProductResponse product = productService.updateProduct(id, request);
+        return ResponseEntity.ok(StandardResponse.ok("Producto actualizado exitosamente", product));
     }
 }

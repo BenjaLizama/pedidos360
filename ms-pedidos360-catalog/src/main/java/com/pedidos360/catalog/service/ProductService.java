@@ -4,6 +4,7 @@ import com.pedidos360.catalog.document.CategoryEntity;
 import com.pedidos360.catalog.document.CategorySnapshot;
 import com.pedidos360.catalog.document.ProductEntity;
 import com.pedidos360.catalog.dto.request.ProductRequest;
+import com.pedidos360.catalog.dto.request.ProductUpdateRequest;
 import com.pedidos360.catalog.dto.response.ProductResponse;
 import com.pedidos360.catalog.exception.ResourceNotFoundException;
 import com.pedidos360.catalog.mapper.ProductMapper;
@@ -56,5 +57,31 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
 
         return productMapper.toResponse(product);
+    }
+
+    /**
+     * Actualiza la información de un producto existente.
+     * Revisa si la categoría fue modificada para actualizar el Snapshot.
+     *
+     * @param id Identificador del producto a actualizar.
+     * @param request DTO con los nuevos datos.
+     * @return ProductResponse con el producto actualizado.
+     * @throws ResourceNotFoundException Si el producto o la nueva categoría no existen.
+     */
+    @Transactional
+    public ProductResponse updateProduct(String id, ProductUpdateRequest request) {
+        ProductEntity existingProduct = productRepository.findByIdAndIsActiveTrue(id.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
+
+        if (request.categoryId() != null && !existingProduct.getCategory().id().equals(request.categoryId())) {
+            CategoryEntity newCategory = categoryRepository.findById(request.categoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("La categoría con ID " + request.categoryId() + " no existe."));
+            existingProduct.setCategory(new CategorySnapshot(newCategory.getId(), newCategory.getName()));
+        }
+
+        productMapper.updateEntityFromRequest(request, existingProduct);
+
+        ProductEntity updatedProduct = productRepository.save(existingProduct);
+        return productMapper.toResponse(updatedProduct);
     }
 }
