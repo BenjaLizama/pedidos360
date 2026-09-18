@@ -1,3 +1,6 @@
 spring:
   application:
     name: catalog
+
+  profiles:
+    active: dev
