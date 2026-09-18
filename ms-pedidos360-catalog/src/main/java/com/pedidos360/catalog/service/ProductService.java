@@ -43,4 +43,18 @@ public class ProductService {
         ProductEntity savedProduct = productRepository.save(productEntity);
         return productMapper.toResponse(savedProduct);
     }
+
+    /**
+     * Consulta la información detallada de un producto específico.
+     *
+     * @param id Identificador único del producto en MongoDB.
+     * @return ProductResponseDTO con los datos limpios del producto.
+     * @throws ResourceNotFoundException Si el producto no se encuentra, lo que dispara un HTTP 404.
+     */
+    public ProductResponse getProductById(String id) {
+        ProductEntity product = productRepository.findByIdAndIsActiveTrue(id.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
+
+        return productMapper.toResponse(product);
+    }
 }

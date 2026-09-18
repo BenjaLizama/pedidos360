@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -32,5 +29,19 @@ public class ProductController {
         ProductResponse product = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(StandardResponse.created("Producto registrado exitosamente", product));
+    }
+
+    /**
+     * Consulta la información detallada de un producto activo.
+     *
+     * @param id Identificador del producto a buscar.
+     * @return ResponseEntity con StandardResponse y código HTTP 200 (OK).
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<StandardResponse<ProductResponse>> getProductById(@PathVariable String id) {
+
+        ProductResponse product = productService.getProductById(id);
+
+        return ResponseEntity.ok(StandardResponse.ok("Producto encontrado", product));
     }
 }

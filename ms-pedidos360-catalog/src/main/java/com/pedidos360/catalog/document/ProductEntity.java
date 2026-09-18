@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collation = "products")
+@Document(collection = "products")
 @Getter @Setter
 public class ProductEntity extends SoftDeleteEntity {
 

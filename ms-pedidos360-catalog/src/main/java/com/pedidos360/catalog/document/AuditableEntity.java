@@ -4,15 +4,16 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.*;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class AuditableEntity {
 
-    @Id
+    @MongoId(FieldType.OBJECT_ID)
     @EqualsAndHashCode.Include
     private String id;
 
