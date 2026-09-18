@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -71,5 +73,44 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    /**
+     * Captura errores relacionados con el cuerpo de la petición (Payload).
+     * Se dispara AUTOMÁTICAMENTE por Spring Boot cuando el cliente no envía el JSON requerido en un POST/PUT,
+     * o cuando el JSON enviado tiene un formato inválido (ej. comas faltantes, texto donde va un número).
+     * Evita que el servidor devuelva un error 500 al fallar la lectura (parseo) de Jackson.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<StandardErrorResponse> handleMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        StandardErrorResponse response = errorMapper.toGenericResponse(
+                HttpStatus.BAD_REQUEST,
+                "REQ_400",
+                "El cuerpo de la petición (JSON) está ausente o mal formado.",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
+     * Captura peticiones que utilizan un verbo HTTP incorrecto para una ruta existente.
+     * Se dispara AUTOMÁTICAMENTE por Spring Boot cuando un cliente intenta acceder a un endpoint válido,
+     * pero utilizando un método no soportado (ej. lanzar un GET a una ruta que solo acepta POST).
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<StandardErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+
+        StandardErrorResponse response = errorMapper.toGenericResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "MET_405",
+                "El método HTTP utilizado no está soportado en esta ruta.",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
 }
