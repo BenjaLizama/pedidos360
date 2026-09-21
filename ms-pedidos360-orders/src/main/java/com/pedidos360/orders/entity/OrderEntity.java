@@ -1,11 +1,41 @@
 package com.pedidos360.orders.entity;
 
-@lombok.Getter
-@lombok.Setter@jakarta.persistence.Entity
-@jakarta.persistence.Table
-public class OrderEntity {
+import com.pedidos360.orders.enums.OrderStateEnum;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
+@Entity
+@Table(name = "orders")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter @Setter
+public class OrderEntity extends AuditableEntity {
 
+    @Column(name = "client_id", nullable = false)
+    private String clientId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_state", nullable = false)
+    private OrderStateEnum orderState;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal total;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderItemEntity> items = new ArrayList<>();
+
+    /**
+     * Método utilitario para agregar ítems y mantener la sincronización
+     * de la relación bidireccional automáticamente.
+     */
+    public void addItem(OrderItemEntity item) {
+        items.add(item);
+        item.setOrder(this);
+    }
 }
