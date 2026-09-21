@@ -56,9 +56,23 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<StandardResponse<ProductResponse>> updateProduct(
             @PathVariable String id,
-            @Valid @RequestBody ProductUpdateRequest request) { // <-- Cambiamos el DTO aquí
+            @Valid @RequestBody ProductUpdateRequest request) {
 
         ProductResponse product = productService.updateProduct(id, request);
         return ResponseEntity.ok(StandardResponse.ok("Producto actualizado exitosamente", product));
+    }
+
+    /**
+     * Realiza el borrado lógico del producto.
+     *
+     * @param id Identificador del producto a eliminar.
+     * @return ResponseEntity sin cuerpo y código HTTP 204 (No Content).
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+
+        productService.deleteProduct(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

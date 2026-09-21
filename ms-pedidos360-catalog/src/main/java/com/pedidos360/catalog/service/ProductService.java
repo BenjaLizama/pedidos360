@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -83,5 +85,24 @@ public class ProductService {
 
         ProductEntity updatedProduct = productRepository.save(existingProduct);
         return productMapper.toResponse(updatedProduct);
+    }
+
+    /**
+     * Realiza el borrado lógico de un producto.
+     * Cambia el estado isActive a false y registra la fecha de eliminación.
+     *
+     * @param id Identificador del producto a eliminar.
+     * @throws ResourceNotFoundException Si el producto no existe o ya está inactivo.
+     */
+    @Transactional
+    public void deleteProduct(String id) {
+        ProductEntity product = productRepository.findByIdAndIsActiveTrue(id.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + id + " no existe."));
+
+        product.setActive(false);
+        product.setDeletedAt(LocalDateTime.now());
+        // El campo 'deletedBy' se llenará automáticamente cuando implementemos Spring Security
+
+        productRepository.save(product);
     }
 }
