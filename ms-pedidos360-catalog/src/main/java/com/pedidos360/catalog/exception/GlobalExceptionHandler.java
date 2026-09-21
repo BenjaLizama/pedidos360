@@ -113,4 +113,23 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
+
+    /**
+     * Captura operaciones de inventario que intentan exceder el stock disponible.
+     * Devuelve un código HTTP 400 (Bad Request) para informar al cliente o al
+     * servicio de órdenes que la cantidad solicitada es inválida y la transacción fue rechazada.
+     */
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<StandardErrorResponse> handleInsufficientStock(
+            InsufficientStockException ex, HttpServletRequest request) {
+
+        StandardErrorResponse response = errorMapper.toGenericResponse(
+                HttpStatus.BAD_REQUEST, // Código 400
+                "STK_400",
+                "Inventario insuficiente para procesar la orden.",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }

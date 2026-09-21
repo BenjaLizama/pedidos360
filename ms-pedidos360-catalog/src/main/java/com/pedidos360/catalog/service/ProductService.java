@@ -3,9 +3,12 @@ package com.pedidos360.catalog.service;
 import com.pedidos360.catalog.document.CategoryEntity;
 import com.pedidos360.catalog.document.CategorySnapshot;
 import com.pedidos360.catalog.document.ProductEntity;
+import com.pedidos360.catalog.dto.request.ProductItemRequest;
 import com.pedidos360.catalog.dto.request.ProductRequest;
 import com.pedidos360.catalog.dto.request.ProductUpdateRequest;
+import com.pedidos360.catalog.dto.request.StockOperationRequest;
 import com.pedidos360.catalog.dto.response.ProductResponse;
+import com.pedidos360.catalog.exception.InsufficientStockException;
 import com.pedidos360.catalog.exception.ResourceNotFoundException;
 import com.pedidos360.catalog.mapper.ProductMapper;
 import com.pedidos360.catalog.repository.CategoryRepository;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -117,5 +121,47 @@ public class ProductService {
         // El campo 'deletedBy' se llenará automáticamente cuando implementemos Spring Security
 
         productRepository.save(product);
+    }
+
+    /**
+     * Valida que todos los productos solicitados tengan stock suficiente.
+     * Acumula los errores para reportar todos los productos faltantes en una sola respuesta.
+     */
+    @Transactional(readOnly = true)
+    public void validateStock(StockOperationRequest request) {
+        List<String> errorMessages = new ArrayList<>();
+
+        for (ProductItemRequest item : request.items()) {
+            ProductEntity product = productRepository.findByIdAndIsActiveTrue(item.productId().trim())
+                    .orElseThrow(() -> new ResourceNotFoundException("El producto con ID " + item.productId() + " no existe."));
+
+            if (product.getStock() < item.quantity()) {
+                errorMessages.add(String.format("'%s' (Solicitado: %d, Disponible: %d)",
+                        product.getName(), item.quantity(), product.getStock()));
+            }
+        }
+
+        // Si la lista de errores no está vacía, lanzamos la excepción con todos los detalles unidos
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = "Stock insuficiente en los siguientes productos: " +
+                    String.join(" | ", errorMessages);
+            throw new InsufficientStockException(combinedMessage);
+        }
+    }
+
+    /**
+     * Descuenta el stock del inventario para una lista de productos.
+     */
+    @Transactional
+    public void decreaseStock(StockOperationRequest request) {
+        // Primero validamos para no dejar datos a medias si alguno falla
+        validateStock(request);
+
+        // Si pasa la validación, descontamos
+        for (ProductItemRequest item : request.items()) {
+            ProductEntity product = productRepository.findByIdAndIsActiveTrue(item.productId().trim()).get();
+            product.setStock(product.getStock() - item.quantity());
+            productRepository.save(product);
+        }
     }
 }

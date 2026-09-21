@@ -2,6 +2,7 @@ package com.pedidos360.catalog.controller;
 
 import com.pedidos360.catalog.dto.request.ProductRequest;
 import com.pedidos360.catalog.dto.request.ProductUpdateRequest;
+import com.pedidos360.catalog.dto.request.StockOperationRequest;
 import com.pedidos360.catalog.dto.response.ProductResponse;
 import com.pedidos360.catalog.dto.response.StandardResponse;
 import com.pedidos360.catalog.service.ProductService;
@@ -89,5 +90,23 @@ public class ProductController {
         productService.deleteProduct(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Valida la disponibilidad y el stock antes de confirmar una orden.
+     */
+    @PostMapping("/validate-stock")
+    public ResponseEntity<StandardResponse<Void>> validateStock(@Valid @RequestBody StockOperationRequest request) {
+        productService.validateStock(request);
+        return ResponseEntity.ok(StandardResponse.ok("Stock validado exitosamente. Hay disponibilidad.", null));
+    }
+
+    /**
+     * Descuenta el stock del inventario cuando la orden es aceptada.
+     */
+    @PutMapping("/decrease-stock")
+    public ResponseEntity<StandardResponse<Void>> decreaseStock(@Valid @RequestBody StockOperationRequest request) {
+        productService.decreaseStock(request);
+        return ResponseEntity.ok(StandardResponse.ok("Inventario actualizado y descontado exitosamente.", null));
     }
 }
