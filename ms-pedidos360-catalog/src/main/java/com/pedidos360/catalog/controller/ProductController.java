@@ -11,12 +11,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
+
+    /**
+     * Lista todos los productos disponibles y activos en el catálogo.
+     *
+     * @return ResponseEntity con StandardResponse que contiene un array de productos y código HTTP 200.
+     */
+    @GetMapping
+    public ResponseEntity<StandardResponse<List<ProductResponse>>> getAllProducts() {
+
+        List<ProductResponse> products = productService.getAllProducts();
+
+        return ResponseEntity.ok(StandardResponse.ok("Listado de productos recuperado", products));
+    }
 
     /**
      * Registra un nuevo producto en el catálogo (destinado a administradores).

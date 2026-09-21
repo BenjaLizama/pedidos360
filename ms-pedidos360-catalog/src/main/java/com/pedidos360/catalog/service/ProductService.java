@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,18 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
+
+    /**
+     * Lista todos los productos disponibles y activos en el catálogo.
+     * Filtra automáticamente los productos que han sufrido un borrado lógico.
+     *
+     * @return Lista de ProductResponse con los datos de los productos activos.
+     */
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findAllByIsActiveTrue().stream()
+                .map(productMapper::toResponse)
+                .toList();
+    }
 
     /**
      * Contiene la lógica de negocio para crear un producto.
