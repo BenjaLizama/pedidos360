@@ -11,6 +11,14 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: keycloak-pedidos360
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
 volumes:
   mongo_data:

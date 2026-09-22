@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class OrderController {
      * Crea un nuevo pedido a partir de los ítems seleccionados y el cliente autenticado.
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<OrderResponse>> createOrder(@Valid @RequestBody OrderRequest request) {
         OrderResponse response = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -39,6 +41,7 @@ public class OrderController {
      * de decidir si filtra por cliente (si se envía el parámetro) o si devuelve todas.
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<List<OrderResponse>>> getOrders(
             @RequestParam(required = false) String customerId) {
 
@@ -52,6 +55,7 @@ public class OrderController {
      * Obtiene el detalle completo de un pedido específico por su ID.
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<OrderResponse>> getOrderById(@PathVariable UUID id) {
         OrderResponse response = orderService.getOrderById(id);
         return ResponseEntity.ok(StandardResponse.ok("Orden recuperada exitosamente", response));
@@ -65,6 +69,7 @@ public class OrderController {
      * @param request JSON con el nuevo estado (status) a aplicar.
      */
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<OrderResponse>> updateOrderStatus(
             @PathVariable UUID id,
             @Valid @RequestBody OrderStatusUpdateRequest request) {
