@@ -77,4 +77,10 @@ public class OrderController {
         OrderResponse response = orderService.updateOrderStatus(id, request.status());
         return ResponseEntity.ok(StandardResponse.ok("Estado de la orden actualizado", response));
     }
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
+    public ResponseEntity<StandardResponse<List<OrderResponse>>> getAllOrders() {
+        List<OrderResponse> response = orderService.getAllOrders();
+        return ResponseEntity.ok(StandardResponse.ok("Todas las órdenes recuperadas exitosamente", response));
+    }
 }

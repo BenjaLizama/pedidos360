@@ -84,4 +84,19 @@ public class BffOrderController {
                 .retrieve()
                 .toEntity(Object.class);
     }
+    /**
+     * [GET] /api/v1/orders/all
+     * Endpoint del BFF para que Operadores y Administradores obtengan todas las órdenes.
+     */
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
+    public ResponseEntity<Object> getAllOrders(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+
+        return restClient.get()
+                .uri(ordersUrl + "/api/v1/orders/all")
+                .headers(h -> { if (authHeader != null) h.set(HttpHeaders.AUTHORIZATION, authHeader); })
+                .retrieve()
+                .toEntity(Object.class);
+    }
 }

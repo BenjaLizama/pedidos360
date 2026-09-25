@@ -12,6 +12,7 @@ import com.pedidos360.orders.exception.OrderNotFoundException;
 import com.pedidos360.orders.mapper.OrderMapper;
 import com.pedidos360.orders.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,6 +109,7 @@ public class OrderService {
      * Recupera absolutamente todas las órdenes del sistema.
      * Útil para perfiles administradores o reportes generales.
      */
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
     @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAll()
@@ -151,4 +153,5 @@ public class OrderService {
                 .map(orderMapper::toResponse)
                 .toList();
     }
+
 }
