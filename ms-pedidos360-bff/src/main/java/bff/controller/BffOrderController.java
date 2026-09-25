@@ -84,6 +84,7 @@ public class BffOrderController {
                 .retrieve()
                 .toEntity(Object.class);
     }
+
     /**
      * [GET] /api/v1/orders/all
      * Endpoint del BFF para que Operadores y Administradores obtengan todas las órdenes.
@@ -98,5 +99,22 @@ public class BffOrderController {
                 .headers(h -> { if (authHeader != null) h.set(HttpHeaders.AUTHORIZATION, authHeader); })
                 .retrieve()
                 .toEntity(Object.class);
+    }
+
+    /**
+     * [DELETE] /api/v1/orders/{id}
+     * Endpoint del BFF para que Administradores eliminen una orden por su ID.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<Void> deleteOrder(
+            @PathVariable String id,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+
+        return restClient.delete()
+                .uri(ordersUrl + "/api/v1/orders/" + id)
+                .headers(h -> { if (authHeader != null) h.set(HttpHeaders.AUTHORIZATION, authHeader); })
+                .retrieve()
+                .toBodilessEntity();
     }
 }

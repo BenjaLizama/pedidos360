@@ -83,4 +83,10 @@ public class OrderController {
         List<OrderResponse> response = orderService.getAllOrders();
         return ResponseEntity.ok(StandardResponse.ok("Todas las órdenes recuperadas exitosamente", response));
     }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<Void> deleteOrder(@PathVariable UUID id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
 }

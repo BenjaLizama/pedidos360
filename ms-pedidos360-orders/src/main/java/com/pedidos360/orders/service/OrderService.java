@@ -153,5 +153,12 @@ public class OrderService {
                 .map(orderMapper::toResponse)
                 .toList();
     }
-
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Transactional
+    public void deleteOrder(UUID id) {
+        if (!orderRepository.existsById(id)) {
+            throw new OrderNotFoundException("No se encontró la orden para eliminar con ID: " + id);
+        }
+        orderRepository.deleteById(id);
+    }
 }
