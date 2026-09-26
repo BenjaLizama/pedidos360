@@ -1,49 +1,165 @@
-# 🚀 Pedidos360 - Order Management System
+# 🚀 Pedidos360
 
-**Pedidos360** es una solución de comercio electrónico basada en una arquitectura de microservicios moderna y desacoplada en Spring Boot, diseñada con separación estricta de dominios, control de auditoría, borrado lógico, contratos RESTful y una estrategia Cloud-native lista para integrarse con AWS API Gateway y VPC Link.
+Pedidos360 es una solución de comercio electrónico basada en una arquitectura de microservicios moderna y desacoplada en Spring Boot. El proyecto está organizado por dominios funcionales, separando la lógica de órdenes y catálogo para facilitar el mantenimiento, la escalabilidad y la evolución independiente de cada servicio.
 
----
-
-## 🏛️ Arquitectura del Sistema
-El sistema se compone de dos microservicios independientes que utilizan bases de datos políglotas optimizadas para la naturaleza de sus datos:
-
-1. **`orders` (Microservicio de Órdenes):**
-    - Gestión transaccional de pedidos e ítems de compra.
-    - Manejo de estados del ciclo de vida del pedido mediante `Enum` de alta eficiencia.
-    - Implementación de control de auditoría base (`AuditableEntity`).
-    - Inmutabilidad de registros transaccionales (sin borrado lógico).
-    - **Base de datos:** PostgreSQL (Relacional) para garantizar integridad referencial, control de versiones y transacciones ACID estrictas.
-
-2. **`catalog` (Microservicio de Catálogo e Inventario):**
-    - Administración flexible de productos, precios, stock y atributos variables.
-    - Herencia de auditoría y soporte para **borrado lógico** (`SoftDeleteEntity`) para descontinuar productos sin perder el historial.
-    - Endpoints internos para validación y descuento automático de inventario.
-    - **Base de datos:** MongoDB (NoSQL) para permitir esquemas flexibles de documentos y consultas de lectura masiva de alto rendimiento.
+La solución está pensada para operar en un entorno Cloud-native, con una base sólida para integrarse con AWS API Gateway y VPC Link, manteniendo una separación clara entre responsabilidades del negocio y la infraestructura.
 
 ---
 
-## 📊 Diagrama de Arquitectura
-*(Próximamente: Espacio para insertar el diagrama general de la solución con API Gateway, VPC Link y los microservicios)*
+## 🏗️ Arquitectura general
+
+El repositorio contiene dos microservicios principales:
+
+1. `ms-pedidos360-orders`
+   - Encargado de gestionar pedidos, líneas de compra y el ciclo de vida de las transacciones comerciales.
+   - Diseñado con enfoque transaccional y modelado orientado al dominio.
+   - Está preparado para trabajar con PostgreSQL como base relacional, priorizando integridad referencial y consistencia.
+
+2. `ms-pedidos360-catalog`
+   - Encargado de administrar productos, inventario, precios y atributos del catálogo.
+   - Diseñado para manejar estructuras más flexibles y consultas de lectura intensiva.
+   - Está preparado para trabajar con MongoDB como base documental.
+
+Cada microservicio se desarrolla como una aplicación Spring Boot independiente, con su propio `pom.xml`, configuración de arranque y pruebas unitarias.
 
 ---
 
-## ⚙️ Requisitos Previos
-Para ejecutar, compilar o desarrollar este proyecto de forma local, asegúrate de contar con lo siguiente instalado en tu entorno:
+## 📁 Estructura del repositorio
 
-- **Java Development Kit (JDK):** Versión 17 o superior.
-- **Maven:** Para la gestión de dependencias y construcción del proyecto.
-- **Docker y Docker Compose:** (Recomendado) Para levantar de forma rápida las instancias locales de PostgreSQL y MongoDB.
-- **Git:** Para el control de versiones.
+```text
+pedidos360/
+├── README.md
+├── docker-compose.yml
+├── ms-pedidos360-orders/
+│   ├── .mvn/
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   ├── pom.xml
+│   └── src/
+│       ├── main/
+│       └── test/
+├── ms-pedidos360-catalog/
+│   ├── .gitattributes
+│   ├── .gitignore
+│   ├── .mvn/
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   ├── pom.xml
+│   └── src/
+│       ├── main/
+│       └── test/
+└── .gitignore
+```
 
 ---
 
-## 🚀 Instalación y Ejecución Local
-*(Próximamente: Instrucciones paso a paso para clonar el repositorio, configurar las variables de entorno y levantar los servicios con Docker Compose)*
+## 🧩 Tecnologías principales
+
+- Java 21
+- Spring Boot 3 / 4 (según configuración del proyecto)
+- Maven
+- PostgreSQL para `orders`
+- MongoDB para `catalog`
+- Spring Data JPA
+- Spring Data MongoDB
+- Spring Web MVC
+- Spring Validation
+- Spring Security + OAuth2 Resource Server
+- Actuator
+- Lombok
+- Pruebas con starter de Spring Boot
 
 ---
 
-## 🛠️ Tecnologías y Características Principales
-- **Backend:** Java, Spring Boot, Spring Data JPA, Spring Data MongoDB.
-- **Bases de Datos:** PostgreSQL (`orders`) y MongoDB (`catalog`).
-- **APIs:** Contratos RESTful limpios con versionado (`/api/v1/...`).
-- **Seguridad & Cloud-Native:** Preparado para integrarse con **OAuth2 / Resource Server**, **AWS API Gateway** y **VPC Link** para una comunicación interna privada y segura dentro de una VPC.
+## ⚙️ Requisitos previos
+
+Antes de ejecutar el proyecto, asegúrate de tener instalado:
+
+- JDK 21 o superior
+- Maven
+- Git
+- Docker y Docker Compose (recomendado para levantar bases de datos y entornos locales)
+
+---
+
+## ▶️ Cómo ejecutar localmente
+
+### 1) Clonar el repositorio
+
+```bash
+git clone https://github.com/BenjaLizama/pedidos360.git
+cd pedidos360
+```
+
+### 2) Ejecutar el microservicio de órdenes
+
+```bash
+cd ms-pedidos360-orders
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+### 3) Ejecutar el microservicio de catálogo
+
+```bash
+cd ../ms-pedidos360-catalog
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+> Cada servicio es una aplicación Spring Boot independiente y puede ejecutarse por separado, según el flujo de trabajo deseado.
+
+### 4) Levantar infraestructura auxiliar
+
+Si deseas preparar bases de datos y servicios complementarios localmente, puedes usar Docker Compose desde la raíz del repositorio:
+
+```bash
+docker compose up -d
+```
+
+> El archivo `docker-compose.yml` se encuentra en la raíz del proyecto y puede ser ampliado según la infraestructura necesaria para cada entorno.
+
+---
+
+## 🧪 Pruebas
+
+Cada microservicio incluye estructura de pruebas bajo `src/test`.
+
+Para ejecutar pruebas de un servicio:
+
+```bash
+cd ms-pedidos360-orders
+./mvnw test
+```
+
+```bash
+cd ../ms-pedidos360-catalog
+./mvnw test
+```
+
+---
+
+## 🛡️ Principios de diseño
+
+Este proyecto busca aplicar buenas prácticas de arquitectura orientada a microservicios:
+
+- Separación de dominios por servicio
+- Independencia operativa entre microservicios
+- Modelo de negocio desacoplado por contexto
+- Preparación para seguridad y autenticación en capa de infraestructura
+- Arquitectura adaptada a entornos cloud y despliegues distribuidos
+- Base para integración con API Gateway y VPC Link
+
+---
+
+## 📌 Estado del proyecto
+
+El repositorio presenta una base sólida para una solución de comercio electrónico modular. Actualmente se encuentra estructurado como una plataforma de microservicios con servicios independientes para órdenes y catálogo, listos para continuar ampliando dominio, casos de uso, seguridad, despliegue y observabilidad.
+
+---
+
+## 📎 Enlaces relevantes
+
+- Repositorio: https://github.com/BenjaLizama/pedidos360
+- Microservicio de órdenes: `ms-pedidos360-orders`
+- Microservicio de catálogo: `ms-pedidos360-catalog`
