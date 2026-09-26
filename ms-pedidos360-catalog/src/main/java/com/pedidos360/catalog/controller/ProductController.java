@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class ProductController {
      * @return ResponseEntity con StandardResponse que contiene un array de productos y código HTTP 200.
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<List<ProductResponse>>> getAllProducts() {
 
         List<ProductResponse> products = productService.getAllProducts();
@@ -42,6 +44,7 @@ public class ProductController {
      * @return ResponseEntity con los datos del producto guardado y código HTTP 201 (Created).
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         ProductResponse product = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -55,6 +58,7 @@ public class ProductController {
      * @return ResponseEntity con StandardResponse y código HTTP 200 (OK).
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<ProductResponse>> getProductById(@PathVariable String id) {
 
         ProductResponse product = productService.getProductById(id);
@@ -70,6 +74,7 @@ public class ProductController {
      * @return ResponseEntity con StandardResponse y código HTTP 200 (OK).
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<ProductResponse>> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody ProductUpdateRequest request) {
@@ -85,6 +90,7 @@ public class ProductController {
      * @return ResponseEntity sin cuerpo y código HTTP 204 (No Content).
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
 
         productService.deleteProduct(id);
@@ -96,6 +102,7 @@ public class ProductController {
      * Valida la disponibilidad y el stock antes de confirmar una orden.
      */
     @PostMapping("/validate-stock")
+    @PreAuthorize("hasAnyRole('CLIENTE', 'OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<Void>> validateStock(@Valid @RequestBody StockOperationRequest request) {
         productService.validateStock(request);
         return ResponseEntity.ok(StandardResponse.ok("Stock validado exitosamente. Hay disponibilidad.", null));
@@ -105,6 +112,7 @@ public class ProductController {
      * Descuenta el stock del inventario cuando la orden es aceptada.
      */
     @PutMapping("/decrease-stock")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMINISTRADOR')")
     public ResponseEntity<StandardResponse<Void>> decreaseStock(@Valid @RequestBody StockOperationRequest request) {
         productService.decreaseStock(request);
         return ResponseEntity.ok(StandardResponse.ok("Inventario actualizado y descontado exitosamente.", null));
